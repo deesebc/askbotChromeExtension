@@ -1,7 +1,9 @@
 var KMapp = {};
 
 // endpoint qie devuelve las preguntas de tipo /api/v1/questions/
-KMapp.questionsEndPoint = 'http://localhost:3000/questions.json';
+KMapp.questionsEndPoint = 'http://localhost:8080/JsonFile/fichero.json';
+
+KMapp.tags = new Array();
 
 KMapp.init = function() {
     // contenedor de preguntas
@@ -34,6 +36,9 @@ KMapp.init = function() {
                 // convierte el array de preguntas en un conjunto de li
                 questionsList.innerHTML += xhr.response.questions.map(KMapp.buildQuestion).join('');
                 
+                //vamos a imprimir los tags mas famosos
+                document.querySelector('#tagsbar').innerHTML = 'Popular Tags: '+createPopularTags();
+                                
                 // establece el evento click de cada pregunta. Efecto acordeón
                 KMapp.attachAccordionEvent();
             }
@@ -65,20 +70,11 @@ KMapp.attachAccordionEvent = function() {
     }
 }
 
-
-// item.author.username
-// item.accepted_answer_id
-// item.added_at
-// item.answer_count
-// item.url
-// item.tags <array>
-// item.view_count
-// item.score
-
 KMapp.buildQuestion = function(item, index) {
     var current= new Date();
     var qDate = new Date(item.added_at*1000);
     var tags = item.tags.map(KMapp.buildTag).join('');
+    item.tags.map(sumTaggs);
     
     return `
         <div class="question-summary narrow">
@@ -131,36 +127,50 @@ KMapp.buildTag = function(item, index) {
     .split('@tag').join(item);
 }
 
+function sumTaggs(item, index) {
+	var encontrado = false;
+	for (var i=0; i < KMapp.tags.length && !encontrado; i++) {
+        if (KMapp.tags[i].tagName === item) {
+        	KMapp.tags[i].tagCount = KMapp.tags[i].tagCount+1;
+        	encontrado = true;
+        }
+    }
+	if(!encontrado){
+		KMapp.tags.push({tagName: item, tagCount: 1});
+	}
+	
+}
+
+function createPopularTags(){
+	
+	KMapp.tags.sort(function(a, b) {
+	    return b.tagCount - a.tagCount;
+	});
+	
+	return KMapp.tags.slice(0, 5).map(function(elem){
+	    return elem.tagName + '('+elem.tagCount+')';
+	}).join(", ");
+}
+
 function timeDifference(current, previous) {
     var msPerMinute = 60 * 1000;
     var msPerHour = msPerMinute * 60;
     var msPerDay = msPerHour * 24;
     var msPerMonth = msPerDay * 30;
     var msPerYear = msPerDay * 365;
-    
     var elapsed = current - previous;
     
     if (elapsed < msPerMinute) {
          return 'hace ' + Math.round(elapsed/1000) + ' segundos';   
-    }
-    
-    else if (elapsed < msPerHour) {
+    }else if (elapsed < msPerHour) {
          return 'hace ' + Math.round(elapsed/msPerMinute) + ' minutos';   
-    }
-    
-    else if (elapsed < msPerDay ) {
+    }else if (elapsed < msPerDay ) {
          return 'hace ' + Math.round(elapsed/msPerHour ) + ' horas';   
-    }
-
-    else if (elapsed < msPerMonth) {
+    }else if (elapsed < msPerMonth) {
          return 'hace ' + Math.round(elapsed/msPerDay) + ' días';   
-    }
-    
-    else if (elapsed < msPerYear) {
+    }else if (elapsed < msPerYear) {
          return 'hace ' + Math.round(elapsed/msPerMonth) + ' meses';   
-    }
-    
-    else {
+    }else {
          return 'hace ' + Math.round(elapsed/msPerYear ) + ' años';   
     }
 }
