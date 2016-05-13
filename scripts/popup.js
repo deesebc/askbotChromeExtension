@@ -37,7 +37,7 @@ KMapp.init = function() {
                 questionsList.innerHTML += xhr.response.questions.map(KMapp.buildQuestion).join('');
                 
                 //vamos a imprimir los tags mas famosos
-                document.querySelector('#tagsbar').innerHTML = 'Popular Tags: '+createPopularTags();
+                document.querySelector('#tagsbar').innerHTML = createPopularTags();
                                 
                 // establece el evento click de cada pregunta. Efecto acordeón
                 KMapp.attachAccordionEvent();
@@ -147,9 +147,13 @@ function createPopularTags(){
 	    return b.tagCount - a.tagCount;
 	});
 	
-	return KMapp.tags.slice(0, 5).map(function(elem){
-	    return elem.tagName + '('+elem.tagCount+')';
-	}).join(", ");
+	var cadena = "<div class='tags'>Popular Tags: ";
+	for(var i=0; i < KMapp.tags.length && i < 5; i++){
+		cadena += "<a href=\"#\" class=\"post-tag t-fenix\" title=\""+KMapp.tags[i].tagName+"\" ";
+		cadena += "rel=\"tag\">"+KMapp.tags[i].tagName + "("+KMapp.tags[i].tagCount+")"+"</a>";
+	}
+	cadena+="</div>";
+	return cadena;
 }
 
 function timeDifference(current, previous) {
