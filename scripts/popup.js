@@ -10,7 +10,7 @@ KMapp.innerTag = "";
 KMapp.init = function(tag) {
 	//reseteamos valores
 	KMapp.tags = new Array();
-	if(tag != null){
+	if(tag != null && (typeof tag === 'string')){
 		console.log("tag no vacio: "+tag);
 		KMapp.innerTag = tag;
 	}else{
