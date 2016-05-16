@@ -5,7 +5,19 @@ KMapp.questionsEndPoint = 'http://localhost:8080/JsonFile/fichero.json';
 
 KMapp.tags = new Array();
 
-KMapp.init = function() {
+KMapp.innerTag = "";
+
+KMapp.init = function(tag) {
+	//reseteamos valores
+	KMapp.tags = new Array();
+	if(tag != null){
+		console.log("tag no vacio: "+tag);
+		KMapp.innerTag = tag;
+	}else{
+		console.log("tag vacio");
+		KMapp.innerTag = "";
+	}
+	
     // contenedor de preguntas
     var questionsList = document.querySelector('#mainbar');
     
@@ -41,6 +53,9 @@ KMapp.init = function() {
                                 
                 // establece el evento click de cada pregunta. Efecto acordeón
                 KMapp.attachAccordionEvent();
+                
+                //anyade la funcion de busqueda por tag
+                KMapp.findTag();
             }
         } else {
             // algo fue mal, fin de la ejecución.
@@ -61,7 +76,6 @@ KMapp.init = function() {
 KMapp.attachAccordionEvent = function() {
     var acc = document.querySelectorAll('.accordion');
     var i;
-
     for (i = 0; i < acc.length; i++) {
         acc[i].onclick = function() {
             this.classList.toggle('active');
@@ -70,13 +84,25 @@ KMapp.attachAccordionEvent = function() {
     }
 }
 
+KMapp.findTag = function(){
+	var aFindTag = document.querySelectorAll('a.findTag');
+    var i;
+    console.log('vamos a iterar');
+    for (i = 0; i < aFindTag.length; i++) {
+    	aFindTag[i].onclick=function(){
+    		console.log("this.title: "+this.title);
+    		KMapp.init(this.title);
+    	}
+    }
+}
+
 KMapp.buildQuestion = function(item, index) {
     var current= new Date();
     var qDate = new Date(item.added_at*1000);
     var tags = item.tags.map(KMapp.buildTag).join('');
     item.tags.map(sumTaggs);
-    
-    return `
+    if(KMapp.innerTag == undefined || tags.indexOf(KMapp.innerTag) > -1){
+    	return `
         <div class="question-summary narrow">
             <div class="cp">
                 <div class="votes">
@@ -118,6 +144,9 @@ KMapp.buildQuestion = function(item, index) {
         .replace('@tags', tags)
         .replace('@summary', item.summary)
         .replace('@url', item.url);
+    }else{
+    	return '';
+    }
 }
 
 KMapp.buildTag = function(item, index) {
@@ -149,7 +178,7 @@ function createPopularTags(){
 	
 	var cadena = "<div class='tags'>Popular Tags: ";
 	for(var i=0; i < KMapp.tags.length && i < 5; i++){
-		cadena += "<a href=\"#\" class=\"post-tag t-fenix\" title=\""+KMapp.tags[i].tagName+"\" ";
+		cadena += "<a href=\"#\" class=\"post-tag t-fenix findTag\" title=\""+KMapp.tags[i].tagName+"\" ";
 		cadena += "rel=\"tag\">"+KMapp.tags[i].tagName + "("+KMapp.tags[i].tagCount+")"+"</a>";
 	}
 	cadena+="</div>";
@@ -183,3 +212,4 @@ function timeDifference(current, previous) {
 KMapp.init();
 
 document.querySelector('a.refresh').onclick = KMapp.init;
+
